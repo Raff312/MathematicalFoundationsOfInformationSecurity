@@ -10,6 +10,10 @@ public partial class Form1 : Form {
     private BigInteger _y;
     private BigInteger _ock;
     private BigInteger _w;
+    private BigInteger _k;
+    private BigInteger _kReverse;
+
+    private BigInteger _x;
 
     public Form1() {
         InitializeComponent();
@@ -23,7 +27,11 @@ public partial class Form1 : Form {
         }
 
         var decryptResult = Decrypt();
-        txtResult.Text = decryptResult.ToString() + " = " + NumberToText(decryptResult);
+        txtResult.Text =
+            "x = " + _x.ToString() +
+            "; k = " + _k +
+            "; k^-1 = " + _kReverse +
+            "; c = " + decryptResult.ToString() + " = " + NumberToText(decryptResult);
     }
 
     private bool Init() {
@@ -52,14 +60,14 @@ public partial class Form1 : Form {
     }
 
     private BigInteger Decrypt() {
-        var x = GetX();
-        var k = BigInteger.ModPow(_ock, x, _p);
-        var gcdResult = MathUtils.ExtendedGcd(_p, k);
+        InitX();
+        _k = BigInteger.ModPow(_ock, _x, _p);
+        _kReverse = MathUtils.ExtendedGcd(_p, _k).t;
 
-        return (_w * gcdResult.t) % _p;
+        return (_w * _kReverse) % _p;
     }
 
-    private string NumberToText(BigInteger number) {
+    private static string NumberToText(BigInteger number) {
         var numberStr = number.ToString();
         if (numberStr.Length % 2 != 0) {
             numberStr = "0" + numberStr;
@@ -74,12 +82,12 @@ public partial class Form1 : Form {
         return result;
     }
 
-    private BigInteger GetX() {
-        var x = BigInteger.One;
-        while (BigInteger.ModPow(_g, x, _p) != _y) {
-            x++;
+    private BigInteger InitX() {
+        _x = BigInteger.One;
+        while (BigInteger.ModPow(_g, _x, _p) != _y) {
+            _x++;
         }
 
-        return x;
+        return _x;
     }
 }
